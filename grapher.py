@@ -35,6 +35,9 @@ parser.add_argument('--hideXTicks', help='Hide the x ticks',
 parser.add_argument('--hideYTicks', help='Hide the y ticks',
                     action='store_const', const=True, default=False)
 
+parser.add_argument('--latex', help='Use latex to render text',
+                    action='store_const', const=True, default=False)
+
 parser.add_argument('--xMultiplier', help='Multiplier for the x axis',
                     type=float, default=1.0)
 
@@ -55,6 +58,11 @@ if not len(args.yErrors) == 0 and not len(args.yErrors) == len(args.cols):
 if args.dashed == True and args.marker == True:
     raise ValueError(
         'Both dashed and marker cannot be enabled at the same time.')
+
+if args.latex:
+    from matplotlib import rc
+    rc('text', usetex=True)
+
 
 # Specify some functions that may be used later on in the script
 
@@ -116,7 +124,8 @@ if args.parser == 'numpy':
                 xError.append(item[args.xError])
         for i, y in enumerate(y):
             graphable.append(
-                Plottable(x=np.array(x), y=np.array(y), label=file_name, yErr=npArrayOrNone(yErrors[i]), xErr=npArrayOrNone(xError)))
+                Plottable(x=np.array(x), y=np.array(y), label=file_name,
+                          yErr=npArrayOrNone(yErrors[i]), xErr=npArrayOrNone(xError)))
 
 # This is the old parser I wrote before I realised numpy.loadtxt existed.
 # I've kept it in in case I made any assumptions about the data
