@@ -75,6 +75,13 @@ def npArrayOrNone(a):
     return np.array(a)
 
 
+def rSquareCalculation(y, f):
+    mean = y.mean()
+    total = ((y-mean)**2).sum()
+    residual = ((y-f)**2).sum()
+    return 1 - residual/total
+
+
 # Graphable is some general internal state that can be plotted by
 # the system later on.
 # It is specified by: [Plottable, Plottable,...]
@@ -192,12 +199,15 @@ if args.regression == 'linear':
         err_gradient = output.sd_beta[0]
         err_intercept = output.sd_beta[1]
 
+        f_x = gradient * data.x + intercept
+
         print(f'Regression Output for Fit Number {i+1}')
         print(f'\tGradient: {gradient} ± {err_gradient}')
         print(f'\tIntercept: {intercept} ± {err_intercept}')
+        print(f'\tRSquare: {rSquareCalculation(data.y, f_x)}')
 
         fits.append(
-            Plottable(x=data.x, y=gradient * data.x + intercept))
+            Plottable(x=data.x, y=f_x))
 
     for f in fits:
         graphable.append(f)
