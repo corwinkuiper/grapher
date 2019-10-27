@@ -195,7 +195,8 @@ if args.regression == 'linear':
 
         f_x = gradient * data.x + intercept
 
-        print(f'Regression Output for Fit Number {i+1}')
+        print(
+            f'Regression Output for Fit Number {i+1} with data labelled {data.label}')
         print(f'\tGradient: {gradient} ± {err_gradient}')
         print(f'\tIntercept: {intercept} ± {err_intercept}')
         print(f'\tRSquare: {rSquareCalculation(data.y, f_x)}')
