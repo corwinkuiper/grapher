@@ -175,17 +175,22 @@ for plot in graphable:
 # Do any regressions
 if args.regression == 'linear':
     import scipy.odr
+    from scipy import stats
 
     fits = []
 
     for i, data in enumerate(graphable):
+        # Since scipy has linregress, can get initial values for slope and intercept using that
+        # which can then be improved and uncertainties taken into account with odr.
+        slope, intercept, _, _, _ = stats.linregress(data.x, data.y)
+
         RealData = scipy.odr.RealData(
             data.x, y=data.y, sy=data.yErr, sx=data.xErr)
 
         def __linearModel__(B, x):
             return B[0]*x + B[1]
         linear = scipy.odr.Model(__linearModel__)
-        odr = scipy.odr.ODR(RealData, linear, beta0=[1, 1])
+        odr = scipy.odr.ODR(RealData, linear, beta0=[slope, intercept])
         output = odr.run()
         gradient = output.beta[0]
         intercept = output.beta[1]
