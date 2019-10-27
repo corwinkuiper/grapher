@@ -108,7 +108,6 @@ class Plottable:
 
 
 # These are here because of the columns in the numpy parser.
-label_index = 0
 read_cols = args.cols
 
 displayType = 'line'
