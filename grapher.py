@@ -151,11 +151,11 @@ elif args.parser == 'old':
             x = []
             y = []
             for line in f:
-                n = line.rstrip().split(' ')
+                n = line.rstrip().split()
                 row = []
 
                 # I apologise for this all
-                for elem in filter(None, n):
+                for elem in n:
                     try:
                         float(elem)
                     except ValueError:
