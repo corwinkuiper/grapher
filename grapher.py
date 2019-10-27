@@ -204,9 +204,7 @@ if args.regression == 'linear':
         RealData = scipy.odr.RealData(
             data.x, y=data.y, sy=data.yErr, sx=data.xErr)
 
-        def __linearModel__(B, x):
-            return B[0]*x + B[1]
-        linear = scipy.odr.Model(__linearModel__)
+        linear = scipy.odr.Model(lambda B, x: B[0]*x + B[1])
         odr = scipy.odr.ODR(RealData, linear, beta0=[slope, intercept])
         output = odr.run()
         gradient = output.beta[0]
