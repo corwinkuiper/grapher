@@ -21,7 +21,7 @@ parser.add_argument('--yErrors', nargs='*', type=int, default=[],
                     help='Specify the columns to read error data from. Multiple can be specified if multiple columns are specified. Numpy parser only.')
 parser.add_argument('--xError', type=int, default=None,
                     help='Specify column to read x errors from.')
-parser.add_argument('--regression', type=str, default='',
+parser.add_argument('--regression', type=str, default=None,
                     help='Specify the type of regression to perform')
 parser.add_argument('--marker', action='store_const', const=True, default=False,
                     help="Render as a set of points rather than a line. This is not that useful as using errors implies markers.")
@@ -58,6 +58,10 @@ if not len(args.yErrors) == 0 and not len(args.yErrors) == len(args.cols):
 if args.dashed == True and args.marker == True:
     raise ValueError(
         'Both dashed and marker cannot be enabled at the same time.')
+
+if args.regression is None and args.dashed == True and (not args.xError is None or len(args.yErrors) > 0):
+    raise ValueError(
+        'x or y errors implies markers, so the line cannot be dashed')
 
 if args.latex:
     from matplotlib import rc
@@ -100,12 +104,21 @@ class Plottable:
         self.label = kwargs.get('label', None)
         self.xErr = kwargs.get('xErr', None)
         self.yErr = kwargs.get('yErr', None)
+        self.displayType = kwargs.get('displayType', None)
 
 
 # These are here because of the columns in the numpy parser.
 label_index = 0
 read_cols = args.cols
 
+displayType = 'line'
+if args.marker:
+    displayType = 'marker'
+elif args.dashed:
+    displayType = 'dashed'
+
+if not args.xError is None or len(args.yErrors) > 0:
+    displayType = 'marker'
 
 if args.parser == 'numpy':
     for file_name in args.files:
@@ -126,7 +139,8 @@ if args.parser == 'numpy':
         for i, y in enumerate(y):
             graphable.append(
                 Plottable(x=np.array(x), y=np.array(y), label=file_name,
-                          yErr=npArrayOrNone(yErrors[i]), xErr=npArrayOrNone(xError)))
+                          yErr=npArrayOrNone(yErrors[i]), xErr=npArrayOrNone(xError),
+                          displayType=displayType))
 
 # This is the old parser I wrote before I realised numpy.loadtxt existed.
 # I've kept it in in case I made any assumptions about the data
@@ -155,7 +169,8 @@ elif args.parser == 'old':
                 x.append(row[0])
                 y.append(row[1])
             graphable.append(
-                Plottable(x=np.array(x), y=np.array(y), label=file_name))
+                Plottable(x=np.array(x), y=np.array(y), label=file_name,
+                          displayType=displayType))
 
 
 else:
@@ -178,6 +193,9 @@ if args.regression == 'linear':
     from scipy import stats
 
     fits = []
+    regressionDisplay = 'line'
+    if args.dashed:
+        regressionDisplay = 'dashed'
 
     for i, data in enumerate(graphable):
         # Since scipy has linregress, can get initial values for slope and intercept using that
@@ -207,7 +225,7 @@ if args.regression == 'linear':
         print(f'\tRSquare: {rSquareCalculation(data.y, f_x)}')
 
         fits.append(
-            Plottable(x=data.x, y=f_x))
+            Plottable(x=data.x, y=f_x, displayType=regressionDisplay))
 
     for f in fits:
         graphable.append(f)
@@ -220,15 +238,12 @@ markers = ['.', 's', 'v', '^', '<', '>']
 fig, ax = plt.subplots()
 for index, a in enumerate(graphable):
     dashStyle = '-'
-    if args.dashed:
+    if a.displayType == 'dashed':
         dashStyle = linestyles[index % len(linestyles)]
 
-    if not a.yErr is None or not a.xErr is None:
+    if a.displayType == 'marker':
         p = ax.errorbar(a.x, a.y, yerr=a.yErr, xerr=a.xErr, capsize=3,
                         linestyle='None', markersize=10, marker=markers[index % len(markers)])
-    elif args.marker:
-        p = ax.plot(a.x, a.y, linestyle='None',  markersize=10,
-                    marker=markers[index % len(markers)])
     else:
         p = ax.plot(a.x, a.y, linestyle=dashStyle)
     if a.label:
