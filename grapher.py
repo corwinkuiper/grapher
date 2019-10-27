@@ -93,12 +93,6 @@ graphable = []
 
 
 class Plottable:
-    x = []
-    y = []
-    label = ''
-    yErr = []
-    xErr = []
-
     def __init__(self, **kwargs):
         self.x = kwargs.get('x', None)
         self.y = kwargs.get('y', None)
