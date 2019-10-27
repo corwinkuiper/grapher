@@ -44,3 +44,11 @@ Here is an example file and a command that can be used to plot it with some *fan
 * Numpy.
 * Matplotlib
 * Scipy (optional, for the regression)
+
+## TODO
+
+A list of what I would like this script to be in the future, if I feel like improving it.
+
+- [ ] Split script into standalone functions such that more advanced logic can be used.
+- [ ] Derive some file structure from headers.
+- [ ] More regression types, maybe.
