@@ -231,21 +231,38 @@ if args.regression == 'linear':
         graphable.append(f)
 
 
-# Do the plotting, it should be fine
-linestyles = ['-', '--', '-.', ':']
-markers = ['.', 's', 'v', '^', '<', '>']
+class Plotstyle:
 
+    types = {
+        'dashed': ['--', '-.', ':'],
+        'marker': ['.', 's', 'v', '^', '<', '>'],
+    }
+
+    index = {
+        'dashed': 0,
+        'marker': 0,
+    }
+
+    def style(self, displayType):
+        if displayType == 'line':
+            return "-"
+        if displayType in self.types:
+            style = self.types[displayType][self.index[displayType] % len(
+                self.types[displayType])]
+            self.index[displayType] += 1
+            return style
+        return "-"
+
+
+styles = Plotstyle()
 fig, ax = plt.subplots()
 for index, a in enumerate(graphable):
-    dashStyle = '-'
-    if a.displayType == 'dashed':
-        dashStyle = linestyles[index % len(linestyles)]
 
     if a.displayType == 'marker':
         p = ax.errorbar(a.x, a.y, yerr=a.yErr, xerr=a.xErr, capsize=3,
-                        linestyle='None', markersize=10, marker=markers[index % len(markers)])
+                        linestyle='None', markersize=10, marker=styles.style('marker'))
     else:
-        p = ax.plot(a.x, a.y, linestyle=dashStyle)
+        p = ax.plot(a.x, a.y, linestyle=styles.style(a.displayType))
     if a.label:
         p[0].set_label(a.label)
 
