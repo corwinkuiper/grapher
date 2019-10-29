@@ -97,6 +97,10 @@ parser.add_argument(
 parser.add_argument(
     "--xMultiplier", help="Multiplier for the x axis", type=float, default=1.0
 )
+parser.add_argument(
+    "--yMultiplier", help="Multiplier for the y axis", type=float, default=1.0
+)
+
 
 parser.add_argument(
     "--dashed",
@@ -262,9 +266,10 @@ for index, plot in enumerate(graphable):
     if args.labels and len(args.labels) > index:
         plot.label = args.labels[index]
 
-# Apply xMultiplier
+# Apply xMultiplier and yMultiplier
 for plot in graphable:
     plot.x = plot.x * args.xMultiplier
+    plot.y = plot.y * args.yMultiplier
 
 # Do any regressions
 if args.regression == "linear":
