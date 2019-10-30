@@ -47,17 +47,20 @@ def perform_regressions(
     regressionType: str, plot_arr: List[plots.Plottable]
 ) -> List[plots.Plottable]:
 
+    if not regressionType:
+        return []
+
     fits = []
-    if regressionType == "linear":
-        for plot in plot_arr:
+    for index, plot in enumerate(plot_arr):
+        if regressionType == "linear":
             fit, params = perform_linear_regression(plot)
-            print(params)
-            fits.append(plots.Plottable(x=plot.x, y=fit))
-    elif regressionType:
-        for plot in plot_arr:
+        else:
             fit, params = perform_arbitrary_regression(plot, regressionType)
-            print(params)
-            fits.append(plots.Plottable(x=plot.x, y=fit))
+
+        print(f"Regression for {plot.label}, which is plot #{index}")
+        print(f"\tCoefficients: {params}")
+        print(f"\tRSquared: {rSquared(plot.y, fit)}")
+        fits.append(plots.Plottable(x=plot.x, y=fit))
 
     return fits
 
