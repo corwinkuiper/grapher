@@ -1,4 +1,4 @@
-from cli import cli
+from arguments import cli
 from parse import Parser
 import transformations
 import regression
