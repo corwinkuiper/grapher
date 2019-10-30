@@ -8,7 +8,7 @@ class Parser:
 
     displayType = "line"
     xError = None
-    yErrors = []
+    yErrors: List[int] = []
     columns = [1]
 
     def __init__(self, columns, xError, yErrors, suggestedDisplayType):
@@ -31,19 +31,19 @@ class Parser:
         plots_from_file = []
         data = np.loadtxt(file_name)
         x = []
-        y = [[] for i in range(0, len(self.columns))]
-        yErrors = [[] for i in range(0, len(self.columns))]
-        xError = []
+        all_y: List[List[float]] = [[] for i in range(0, len(self.columns))]
+        yErrors: List[List[float]] = [[] for i in range(0, len(self.columns))]
+        xError: List[float] = []
         for item in data:
             x.append(item[0])
             for i, v in enumerate(self.columns):
                 val = item[v]
-                y[i].append(val)
+                all_y[i].append(val)
             for i, v in enumerate(self.yErrors):
                 yErrors[i].append(item[v])
             if self.xError:
                 xError.append(item[self.xError])
-        for i, y in enumerate(y):
+        for i, y in enumerate(all_y):
             plots_from_file.append(
                 plots.Plottable(
                     x=np.array(x),

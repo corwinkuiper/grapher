@@ -3,12 +3,12 @@ from scipy import stats
 import numpy as np
 import plots
 from helpers import rSquared, Value, DictionaryFormatter
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union
 
 
 def perform_linear_regression(
     plot: plots.Plottable
-) -> Tuple[plots.Plottable, List[Value]]:
+) -> Tuple[np.ndarray, Dict[str, Value]]:
     slope, intercept, _, _, _ = stats.linregress(plot.x, plot.y)
     RealData = odr.RealData(plot.x, y=plot.y, sx=plot.xErr, sy=plot.yErr)
     o = odr.ODR(
@@ -16,7 +16,7 @@ def perform_linear_regression(
     )
     output = o.run()
     beta = output.beta
-    f_x = beta[0] * plot.x + beta[1]
+    f_x: np.ndarray = beta[0] * plot.x + beta[1]
 
     return (
         f_x,
@@ -29,7 +29,7 @@ def perform_linear_regression(
 
 def perform_arbitrary_regression(
     plot: plots.Plottable, function: str
-) -> Tuple[plots.Plottable, List[Value]]:
+) -> Tuple[np.ndarray, Dict[str, Value]]:
     pyFunc = mathsFunction(function)
     ODRModel = odr.Model(pyFunc.function)
     RealData = odr.RealData(plot.x, y=plot.y, sy=plot.yErr, sx=plot.xErr)
@@ -51,13 +51,15 @@ def perform_regressions(
 
     if not regressionType:
         return []
+    if not regressionType == "linear":
+        compiled_regression = compile(regressionType, "regression_function", "eval")
 
     fits = []
     for index, plot in enumerate(plot_arr):
         if regressionType == "linear":
             fit, params = perform_linear_regression(plot)
         else:
-            fit, params = perform_arbitrary_regression(plot, regressionType)
+            fit, params = perform_arbitrary_regression(plot, compiled_regression)
 
         print(f"Regression for {plot.label}, which is plot #{index+1}")
         print(f"\tCoefficients:")
@@ -89,17 +91,17 @@ class mathsFunction:
         "__builtins__": None,
     }
 
-    letterToNumber = None
+    letterToNumber: Dict[str, int] = {}
     numberOfConstants = 0
 
     class variables:
 
-        letterToNumber = {}
-        beta = []
-        x = 0
+        letterToNumber: Dict[str, int] = {}
+        beta: List[float] = []
+        x = 1.0
         dry_run = True
 
-        def __getitem__(self, key):
+        def __getitem__(self, key: str):
             if key == "x":
                 return self.x
 
@@ -107,11 +109,11 @@ class mathsFunction:
                 if not key in self.letterToNumber:
                     self.letterToNumber[key] = len(self.letterToNumber)
                 if self.dry_run and len(self.beta) <= self.letterToNumber[key]:
-                    return 0
+                    return 1.0
                 return self.beta[self.letterToNumber[key]]
             raise KeyError
 
-        def set_values(self, b, x):
+        def set_values(self, b: List[float], x: np.ndarray):
             self.beta = b
             self.x = x
 
