@@ -3,10 +3,12 @@ from scipy import stats
 import numpy as np
 import plots
 from helpers import rSquared, Value
-from typing import List
+from typing import List, Tuple
 
 
-def perform_linear_regression(plot: plots.Plottable) -> plots.Plottable:
+def perform_linear_regression(
+    plot: plots.Plottable
+) -> Tuple[plots.Plottable, List[Value]]:
     slope, intercept, _, _, _ = stats.linregress(plot.x, plot.y)
     RealData = odr.RealData(plot.x, y=plot.y, sx=plot.xErr, sy=plot.yErr)
     o = odr.ODR(
@@ -27,7 +29,7 @@ def perform_linear_regression(plot: plots.Plottable) -> plots.Plottable:
 
 def perform_arbitrary_regression(
     plot: plots.Plottable, function: str
-) -> plots.Plottable:
+) -> Tuple[plots.Plottable, List[Value]]:
     pyFunc = mathsFunction(function)
     ODRModel = odr.Model(pyFunc.function)
     RealData = odr.RealData(plot.x, y=plot.y, sy=plot.yErr, sx=plot.xErr)
