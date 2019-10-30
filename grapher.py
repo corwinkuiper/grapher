@@ -140,6 +140,102 @@ if args.latex:
 
     rc("text", usetex=True)
 
+# Class definitions
+
+
+class Plottable:
+    def __init__(self, **kwargs):
+        self.x = kwargs.get("x", None)
+        self.y = kwargs.get("y", None)
+
+        self.label = kwargs.get("label", None)
+        self.xErr = kwargs.get("xErr", None)
+        self.yErr = kwargs.get("yErr", None)
+        self.displayType = kwargs.get("displayType", None)
+
+
+import numpy as np
+
+
+class mathematicalFunction:
+    __globals__ = {
+        "sin": np.sin,
+        "sinh": np.sinh,
+        "cos": np.cos,
+        "cosh": np.cosh,
+        "tan": np.tan,
+        "tanh": np.tanh,
+        "asin": np.arcsin,
+        "acos": np.arccos,
+        "atan": np.arctan,
+        "asinh": np.arcsinh,
+        "acosh": np.arccosh,
+        "atanh": np.arctanh,
+        "pi": np.pi,
+        "e": np.e,
+        "exp": np.exp,
+        "log": np.log,
+        "__builtins__": None,
+    }
+
+    letterToNumber = None
+    numberOfConstants = 0
+
+    class variables:
+
+        letterToNumber = {}
+        beta = []
+        x = 0
+        dry_run = True
+
+        def __getitem__(self, key):
+            if key == "x":
+                return self.x
+
+            if len(key) == 1 and key in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                if not key in self.letterToNumber:
+                    self.letterToNumber[key] = len(self.letterToNumber)
+                if self.dry_run and len(self.beta) <= self.letterToNumber[key]:
+                    return 0
+                return self.beta[self.letterToNumber[key]]
+            raise KeyError
+
+        def set_values(self, b, x):
+            self.beta = b
+            self.x = x
+
+    def __init__(self, functionString):
+        self.__vars__ = self.variables()
+        eval(functionString, self.__globals__, self.__vars__)
+        self.numberOfConstants = len(self.__vars__.letterToNumber)
+        self.letterToNumber = self.__vars__.letterToNumber
+
+        self.__vars__.dry_run = False
+
+        def f(B, x):
+            self.__vars__.set_values(B, x)
+            return eval(functionString, self.__globals__, self.__vars__)
+
+        self.function = f
+
+
+class Plotstyle:
+
+    types = {"dashed": ["--", "-.", ":"], "marker": [".", "s", "v", "^", "<", ">"]}
+
+    index = {"dashed": 0, "marker": 0}
+
+    def style(self, displayType):
+        if displayType == "line":
+            return "-"
+        if displayType in self.types:
+            style = self.types[displayType][
+                self.index[displayType] % len(self.types[displayType])
+            ]
+            self.index[displayType] += 1
+            return style
+        return "-"
+
 
 # Specify some functions that may be used later on in the script
 
@@ -167,18 +263,6 @@ def rSquareCalculation(y, f):
 # is numpy loadtxt. At the moment numpy is more advanced as columns can
 # be specified and I'd imagine it's better at parsing files.
 graphable = []
-
-
-class Plottable:
-    def __init__(self, **kwargs):
-        self.x = kwargs.get("x", None)
-        self.y = kwargs.get("y", None)
-
-        self.label = kwargs.get("label", None)
-        self.xErr = kwargs.get("xErr", None)
-        self.yErr = kwargs.get("yErr", None)
-        self.displayType = kwargs.get("displayType", None)
-
 
 # These are here because of the columns in the numpy parser.
 read_cols = args.cols
@@ -272,60 +356,62 @@ for plot in graphable:
     plot.y = plot.y * args.yMultiplier
 
 # Do any regressions
-if args.regression == "linear":
+if not args.regression is None:
     import scipy.odr
-    from scipy import stats
 
     fits = []
     regressionDisplay = "line"
     if args.dashed:
         regressionDisplay = "dashed"
 
-    for i, data in enumerate(graphable):
-        # Since scipy has linregress, can get initial values for slope and intercept using that
-        # which can then be improved and uncertainties taken into account with odr.
-        slope, intercept, _, _, _ = stats.linregress(data.x, data.y)
+    if args.regression == "linear":
+        from scipy import stats
 
-        RealData = scipy.odr.RealData(data.x, y=data.y, sy=data.yErr, sx=data.xErr)
+        for i, data in enumerate(graphable):
+            # Since scipy has linregress, can get initial values for slope and intercept using that
+            # which can then be improved and uncertainties taken into account with odr.
+            slope, intercept, _, _, _ = stats.linregress(data.x, data.y)
 
-        linear = scipy.odr.Model(lambda B, x: B[0] * x + B[1])
-        odr = scipy.odr.ODR(RealData, linear, beta0=[slope, intercept])
-        output = odr.run()
-        gradient = output.beta[0]
-        intercept = output.beta[1]
+            RealData = scipy.odr.RealData(data.x, y=data.y, sy=data.yErr, sx=data.xErr)
 
-        err_gradient = output.sd_beta[0]
-        err_intercept = output.sd_beta[1]
+            linear = scipy.odr.Model(lambda B, x: B[0] * x + B[1])
+            odr = scipy.odr.ODR(RealData, linear, beta0=[slope, intercept])
+            output = odr.run()
+            gradient = output.beta[0]
+            intercept = output.beta[1]
 
-        f_x = gradient * data.x + intercept
+            err_gradient = output.sd_beta[0]
+            err_intercept = output.sd_beta[1]
 
-        print(f"Regression Output for Fit Number {i+1} with data labelled {data.label}")
-        print(f"\tGradient: {gradient} ± {err_gradient}")
-        print(f"\tIntercept: {intercept} ± {err_intercept}")
-        print(f"\tRSquare: {rSquareCalculation(data.y, f_x)}")
+            f_x = gradient * data.x + intercept
 
-        fits.append(Plottable(x=data.x, y=f_x, displayType=regressionDisplay))
+            print(
+                f"Regression Output for Fit Number {i+1} with data labelled {data.label}"
+            )
+            print(f"\tGradient: {gradient} ± {err_gradient}")
+            print(f"\tIntercept: {intercept} ± {err_intercept}")
+            print(f"\tRSquare: {rSquareCalculation(data.y, f_x)}")
+
+            fits.append(Plottable(x=data.x, y=f_x))
+
+    # Try to make a function out of it
+    else:
+        func = mathematicalFunction(args.regression)
+        model = scipy.odr.Model(func.function)
+        numberOfConstants = func.numberOfConstants
+        for i, plot in enumerate(graphable):
+            data = scipy.odr.RealData(plot.x, y=plot.y, sy=plot.yErr, sx=plot.xErr)
+            odr = scipy.odr.ODR(data, model, beta0=[1] * numberOfConstants)
+            output = odr.run()
+
+            for number, letter in enumerate(func.__vars__.letterToNumber):
+                print(f"\t{letter} = {output.beta[number]}")
+
+            fits.append(Plottable(x=data.x, y=func.function(output.beta, data.x)))
 
     for f in fits:
+        f.displayType = regressionDisplay
         graphable.append(f)
-
-
-class Plotstyle:
-
-    types = {"dashed": ["--", "-.", ":"], "marker": [".", "s", "v", "^", "<", ">"]}
-
-    index = {"dashed": 0, "marker": 0}
-
-    def style(self, displayType):
-        if displayType == "line":
-            return "-"
-        if displayType in self.types:
-            style = self.types[displayType][
-                self.index[displayType] % len(self.types[displayType])
-            ]
-            self.index[displayType] += 1
-            return style
-        return "-"
 
 
 styles = Plotstyle()
