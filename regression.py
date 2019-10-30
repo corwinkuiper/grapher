@@ -2,7 +2,7 @@ import scipy.odr as odr
 from scipy import stats
 import numpy as np
 import plots
-from helpers import rSquared, Value
+from helpers import rSquared, Value, DictionaryFormatter
 from typing import List, Tuple
 
 
@@ -60,7 +60,8 @@ def perform_regressions(
             fit, params = perform_arbitrary_regression(plot, regressionType)
 
         print(f"Regression for {plot.label}, which is plot #{index+1}")
-        print(f"\tCoefficients: {params}")
+        print(f"\tCoefficients:")
+        print("\t\t" + "\n\t\t".join(DictionaryFormatter(params).splitlines()))
         print(f"\tRSquared: {rSquared(plot.y, fit)}")
         fits.append(plots.Plottable(x=plot.x, y=fit))
 

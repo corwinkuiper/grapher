@@ -23,3 +23,11 @@ class Value:
 
     def __repr__(self):
         return f"{self.number} ± {self.error}"
+
+
+def DictionaryFormatter(dictionary: dict):
+    output = ""
+
+    for key, value in dictionary.items():
+        output = f"{output}\n{key}:\t{value}"
+    return output.strip()
