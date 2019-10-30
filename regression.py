@@ -37,7 +37,7 @@ def perform_arbitrary_regression(
     f_x = pyFunc.function(output.beta, plot.x)
 
     coefficients = {}
-    for number, letter in enumerate(pyFunc.letterToNumber):
+    for letter, number in pyFunc.letterToNumber.items():
         coefficients[letter] = Value(output.beta[number], output.sd_beta[number])
 
     return f_x, coefficients
