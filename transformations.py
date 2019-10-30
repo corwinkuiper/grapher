@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 import plots
 
 
@@ -9,7 +9,7 @@ def apply_all(plot_list: List[plots.Plottable], arguments):
         y_multiplier(plot, arguments.yMultiplier)
 
 
-def labels(plot: plots.Plottable, index: int, labels: Tuple[None, List[str]]):
+def labels(plot: plots.Plottable, index: int, labels: List[str]):
     if not labels is None and len(labels) > index:
         plot.label = labels[index]
 
