@@ -11,11 +11,11 @@ In general I think it works best when you have a bunch of data sets in different
 
 ## Usage
 
-`python grapher.py --help` displays the help information.
+`python /path/to/grapher/directory --help` displays the help information.
 The only required parameter is `--files`.
-So `python grapher.py --files data.dat` will plot the data found in `data.dat`.
+So `python /path/to/grapher/directory --files data.dat` will plot the data found in `data.dat`.
 It attempts this by loading the file using `numpy.loadtxt` and taking the first column as the x data and the second column as y data.
-If you want to specify to use another, or multiple y columns, use `--cols` to pass in one or multiple y columns.
+If you want to specify to use another, or multiple y columns, use `--columns` to pass in one or multiple y columns.
 
 I will not cover all the other options as I think some if not most are somewhat self explanatory.
 If you want to know what a parameter does, open an issue.
@@ -36,7 +36,7 @@ Here is an example file and a command that can be used to plot it with some *fan
  4     0.1      44     5
 ```
 
-`python grapher.py --files data.dat --cols 2 --xError 1 --yErrors 3 --regression linear`
+`python /path/to/grapher/directory --files data.dat --columns 2 --xError 1 --yErrors 3 --regression linear`
 
 ## Requirements
 
@@ -49,6 +49,6 @@ Here is an example file and a command that can be used to plot it with some *fan
 
 A list of what I would like this script to be in the future, if I feel like improving it.
 
-- [ ] Split script into standalone functions such that more advanced logic can be used.
+- [x] Split script into standalone functions such that more advanced logic can be used.
 - [ ] Derive some file structure from headers.
-- [ ] More regression types, maybe.
+- [x] More regression types, maybe.
