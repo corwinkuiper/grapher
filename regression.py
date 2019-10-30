@@ -59,7 +59,7 @@ def perform_regressions(
         else:
             fit, params = perform_arbitrary_regression(plot, regressionType)
 
-        print(f"Regression for {plot.label}, which is plot #{index}")
+        print(f"Regression for {plot.label}, which is plot #{index+1}")
         print(f"\tCoefficients: {params}")
         print(f"\tRSquared: {rSquared(plot.y, fit)}")
         fits.append(plots.Plottable(x=plot.x, y=fit))
