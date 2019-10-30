@@ -1,35 +1,101 @@
 import argparse
+from typing import List, Union, Tuple
+
+
+class arguments:
+    def __init__(
+        self,
+        files: List[str] = None,
+        labels: List[str] = None,
+        x: str = None,
+        y: str = None,
+        hideLegend: bool = False,
+        columns: List[int] = [1],
+        yErrors: List[int] = [],
+        xError: int = None,
+        regression: str = None,
+        displayType: str = "line",
+        hideXTicks: bool = False,
+        hideYTicks: bool = False,
+        hideXLabels: bool = False,
+        hideYLabels: bool = False,
+        latex: bool = False,
+        xMultiplier: float = 1.0,
+        yMultiplier: float = 1.0,
+    ):
+        self.files: List[str] = files
+        self.labels: List[str] = labels
+        self.x: str = x
+        self.y: str = y
+        self.hideLegend: bool = hideLegend
+        self.columns: List[int] = columns
+        self.yErrors: List[int] = yErrors
+        self.xError: int = xError
+        self.regression: str = regression
+        self.displayType: str = displayType
+        self.hideXLabels: bool = hideXLabels
+        self.hideYLabels: bool = hideYLabels
+        self.hideXTicks: bool = hideXTicks
+        self.hideYTicks: bool = hideYTicks
+        self.latex: bool = latex
+        self.xMultiplier: float = xMultiplier
+        self.yMultiplier: float = yMultiplier
+
+    files: List[str]
+    labels: List[str]
+    x: str
+    y: str
+    hideLegend: bool
+    columns: List[int]
+    yErrors: List[int]
+    xError: int
+    regression: str
+    displayType: str
+    hideXLabels: bool
+    hideYLabels: bool
+    hideXTicks: bool
+    hideYTicks: bool
+    latex: bool
+    xMultiplier: float
+    yMultiplier: float
+
+    def validate(self) -> Tuple[bool, List]:
+        error_list = []
+        # Check validity of arguments passed in
+        if not len(self.yErrors) == 0 and not len(self.yErrors) == len(self.columns):
+            error_list.append(
+                "If yErrors specified, there must be an equal number of columns and y errors."
+            )
+        if (
+            self.regression is None
+            and self.displayType == "dashed"
+            and (not self.xError is None or len(self.yErrors) > 0)
+        ):
+            error_list.append(
+                "x or y errors implies markers, so the line cannot be dashed"
+            )
+
+        return len(error_list) == 0, error_list
+
+
+class BadArguments(Exception):
+    def __init__(self, errors: List):
+        super().__init__("\n".join(errors))
 
 
 class cli:
-    class BadArguments(Exception):
-        def __init__(self, message):
-            self.message = message
-
     parser = None
 
-    def args(self):
-        arguments = self.parser.parse_args()
+    def args(self) -> arguments:
+        argument = arguments()
 
-        potential_errors = self.check_argument_validity(arguments)
-        if potential_errors is None:
-            return arguments
+        self.parser.parse_args(namespace=argument)
 
-        raise self.BadArguments(potential_errors)
+        ok, potential_errors = argument.validate()
+        if ok:
+            return argument
 
-    def check_argument_validity(self, args) -> str:
-        # Check validity of arguments passed in
-        if not len(args.yErrors) == 0 and not len(args.yErrors) == len(args.columns):
-            return "If yErrors specified, there must be an equal number of columns and y errors."
-
-        if (
-            args.regression is None
-            and args.displayType == "dashed"
-            and (not args.xError is None or len(args.yErrors) > 0)
-        ):
-            return "x or y errors implies markers, so the line cannot be dashed"
-
-        return None
+        raise BadArguments(potential_errors)
 
     def __init__(self):
         self.parser = argparse.ArgumentParser(

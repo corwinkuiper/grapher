@@ -1,12 +1,13 @@
 from typing import List
 import plots
+from arguments import arguments
 
 
-def apply_all(plot_list: List[plots.Plottable], arguments):
+def apply_all(plot_list: List[plots.Plottable], args: arguments):
     for index, plot in enumerate(plot_list):
-        labels(plot, index, arguments.labels)
-        x_multiplier(plot, arguments.xMultiplier)
-        y_multiplier(plot, arguments.yMultiplier)
+        labels(plot, index, args.labels)
+        x_multiplier(plot, args.xMultiplier)
+        y_multiplier(plot, args.yMultiplier)
 
 
 def labels(plot: plots.Plottable, index: int, labels: List[str]):

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import plots
 from typing import List
+from arguments import arguments
 
 styles = plots.Plotstyle()
 
@@ -29,8 +30,8 @@ def plot(plots: List[plots.Plottable]):
         plot_single(axis, plot)
 
 
-def set_style(arguments):
-    if not arguments.hideLegend:
+def set_style(args: arguments):
+    if not args.hideLegend:
         plt.legend()
 
     # Start standard style, if you don't like how this is done you can change it
@@ -38,17 +39,17 @@ def set_style(arguments):
 
     # Apply custom style. These modifications are commonly used so are included
     # as command line arguments.
-    if arguments.hideXLabels:
+    if args.hideXLabels:
         plt.tick_params(axis="x", labelbottom=False)
 
-    if arguments.hideYLabels:
+    if args.hideYLabels:
         plt.tick_params(axis="y", labelleft=False)
 
-    if arguments.hideXTicks:
+    if args.hideXTicks:
         plt.tick_params(axis="x", bottom=False, top=False)
 
-    if arguments.hideYTicks:
+    if args.hideYTicks:
         plt.tick_params(axis="y", left=False, right=False)
 
-    plt.xlabel(arguments.x)
-    plt.ylabel(arguments.y)
+    plt.xlabel(args.x)
+    plt.ylabel(args.y)
