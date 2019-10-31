@@ -22,6 +22,8 @@ If you want to know what a parameter does, open an issue.
 If you want to know if it can do something open an issue.
 If you want it to do something open an issue.
 
+Many further details can be found in [USAGE.md](USAGE.md).
+
 
 ## File format
 
@@ -49,6 +51,15 @@ Here is an example file and a command that can be used to plot it with some *fan
 
 A list of what I would like this script to be in the future, if I feel like improving it.
 
-- [x] Split script into standalone functions such that more advanced logic can be used.
 - [ ] Derive some file structure from headers.
+- [ ] Ability to be called from python.
+- [ ] Specification of size of graph.
+- [ ] Save to file directly.
+- [ ] Culmination of a lot of the above -> [pythontex](https://www.ctan.org/pkg/pythontex) or similar.
+
+### Done
+
+Things I've completed having previously been in TODO.
+
+- [x] Split script into standalone functions such that more advanced logic can be used.
 - [x] More regression types, maybe.
