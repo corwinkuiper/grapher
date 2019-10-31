@@ -50,7 +50,9 @@ def perform_arbitrary_regression(
             best = next_val(l[1:], new_b, best)
         return best
 
-    coList = [None] * pyFunc.numberOfCoefficients
+    coList: List[Union[None, mathsFunction.variables.coefficient]] = [
+        None
+    ] * pyFunc.numberOfCoefficients
     for letter, coef in coeffs.items():
         coList[pyFunc.letterToNumber[letter]] = coef
     output = next_val(coList, [], None)
@@ -141,10 +143,10 @@ class mathsFunction:
                 return self.value
 
         coeffs: Dict[str, coefficient] = {}
-        letterToNumber = {}
-        beta = []
-        x = 0
-        dry_run = True
+        letterToNumber: Dict[str, int] = {}
+        beta: List[float] = []
+        x: float = 1.0
+        dry_run: bool = True
 
         def __getitem__(self, key: str):
             if key == "x":
@@ -164,8 +166,8 @@ class mathsFunction:
             self.beta = b
             self.x = x
 
-    letterToNumber = None
-    numberOfCoefficients = 0
+    letterToNumber: Dict[str, int] = {}
+    numberOfCoefficients: int = 0
     coefficients: Dict[str, variables.coefficient] = {}
 
     def __init__(self, functionString):
