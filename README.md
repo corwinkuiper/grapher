@@ -40,7 +40,7 @@ Here is an example file and a command that can be used to plot it with some *fan
 
 ## Requirements
 
-* Python of some sort. I use one of the 3s.
+* Python of some sort. I use at least 3.7.0.
 * Numpy.
 * Matplotlib
 * Scipy (optional, for the regression)
