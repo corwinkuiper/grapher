@@ -33,8 +33,27 @@ def perform_arbitrary_regression(
     pyFunc = mathsFunction(function)
     ODRModel = odr.Model(pyFunc.function)
     RealData = odr.RealData(plot.x, y=plot.y, sy=plot.yErr, sx=plot.xErr)
-    o = odr.ODR(RealData, ODRModel, beta0=[1] * pyFunc.numberOfConstants)
-    output = o.run()
+    coeffs = pyFunc.coefficients
+
+    def next_val(l: List, b: List, best: odr.Output) -> odr.Output:
+        if len(l) == 0:
+            o = odr.ODR(RealData, ODRModel, beta0=b)
+            output = o.run()
+            if best is None:
+                return output
+            if best.sum_square > output.sum_square:
+                return output
+            return best
+        for n in np.linspace(l[0].initial, l[0].final, l[0].number):
+            new_b = b.copy()
+            new_b.append(n)
+            best = next_val(l[1:], new_b, best)
+        return best
+
+    coList = [None] * pyFunc.numberOfCoefficients
+    for letter, coef in coeffs.items():
+        coList[pyFunc.letterToNumber[letter]] = coef
+    output = next_val(coList, [], None)
 
     f_x = pyFunc.function(output.beta, plot.x)
 
@@ -91,14 +110,40 @@ class mathsFunction:
         "__builtins__": None,
     }
 
-    letterToNumber: Dict[str, int] = {}
-    numberOfConstants = 0
-
     class variables:
+        class coefficient(float):
 
-        letterToNumber: Dict[str, int] = {}
-        beta: List[float] = []
-        x = 1.0
+            initial: float = 1.0
+            final: float = 1.0
+            number: int = 1
+            dry_run: bool = False
+
+            def __init__(self, value):
+                self.value = float(value)
+
+            def __call__(self, *argv) -> float:
+                if not self.dry_run:
+                    return self.value
+                if len(argv) == 0:
+                    raise Exception("Wrong call of coefficient")
+                if len(argv) == 1:
+                    self.initial = argv[0]
+                    self.final = self.initial
+                if len(argv) == 2:
+                    self.initial = argv[0]
+                    self.final = argv[1]
+                    self.number = 10
+                if len(argv) == 3:
+                    self.initial = argv[0]
+                    self.final = argv[1]
+                    self.number = argv[2]
+
+                return self.value
+
+        coeffs: Dict[str, coefficient] = {}
+        letterToNumber = {}
+        beta = []
+        x = 0
         dry_run = True
 
         def __getitem__(self, key: str):
@@ -109,19 +154,26 @@ class mathsFunction:
                 if not key in self.letterToNumber:
                     self.letterToNumber[key] = len(self.letterToNumber)
                 if self.dry_run and len(self.beta) <= self.letterToNumber[key]:
-                    return 1.0
-                return self.beta[self.letterToNumber[key]]
+                    self.coeffs[key] = self.coefficient(1.0)
+                    self.coeffs[key].dry_run = True
+                    return self.coeffs[key]
+                return self.coefficient(self.beta[self.letterToNumber[key]])
             raise KeyError
 
         def set_values(self, b: List[float], x: np.ndarray):
             self.beta = b
             self.x = x
 
+    letterToNumber = None
+    numberOfCoefficients = 0
+    coefficients: Dict[str, variables.coefficient] = {}
+
     def __init__(self, functionString):
         self.__vars__ = self.variables()
         eval(functionString, self.__globals__, self.__vars__)
-        self.numberOfConstants = len(self.__vars__.letterToNumber)
+        self.numberOfCoefficients = len(self.__vars__.letterToNumber)
         self.letterToNumber = self.__vars__.letterToNumber
+        self.coefficients = self.__vars__.coeffs
 
         self.__vars__.dry_run = False
 
