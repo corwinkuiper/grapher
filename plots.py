@@ -1,12 +1,24 @@
-class Plottable:
-    def __init__(self, **kwargs):
-        self.x = kwargs.get("x", None)
-        self.y = kwargs.get("y", None)
+import numpy as np
+from typing import List, Union
 
-        self.label = kwargs.get("label", None)
-        self.xErr = kwargs.get("xErr", None)
-        self.yErr = kwargs.get("yErr", None)
-        self.displayType = kwargs.get("displayType", None)
+
+class Plottable:
+    def __init__(
+        self,
+        x=[],
+        y=[],
+        label: Union[str, None] = None,
+        xErr: Union[int, None] = None,
+        yErr: Union[List[int], None] = None,
+        displayType: Union[str, None] = None,
+    ):
+        self.x = np.array(x)
+        self.y = np.array(y)
+
+        self.label = label
+        self.xErr = xErr
+        self.yErr = yErr
+        self.displayType = displayType
 
 
 class Plotstyle:

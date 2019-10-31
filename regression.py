@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Union
 
 def perform_linear_regression(
     plot: plots.Plottable
-) -> Tuple[np.ndarray, Dict[str, Value]]:
+) -> Tuple[plots.Plottable, Dict[str, Value], np.ndarray]:
     slope, intercept, _, _, _ = stats.linregress(plot.x, plot.y)
     RealData = odr.RealData(plot.x, y=plot.y, sx=plot.xErr, sy=plot.yErr)
     o = odr.ODR(
@@ -19,17 +19,18 @@ def perform_linear_regression(
     f_x: np.ndarray = beta[0] * plot.x + beta[1]
 
     return (
-        f_x,
+        plots.Plottable(x=plot.x, y=f_x),
         {
             "gradient": Value(beta[0], output.sd_beta[0]),
             "intercept": Value(beta[1], output.sd_beta[1]),
         },
+        f_x,
     )
 
 
 def perform_arbitrary_regression(
     plot: plots.Plottable, function: str
-) -> Tuple[np.ndarray, Dict[str, Value]]:
+) -> Tuple[plots.Plottable, Dict[str, Value], np.ndarray]:
     pyFunc = mathsFunction(function)
     ODRModel = odr.Model(pyFunc.function)
     RealData = odr.RealData(plot.x, y=plot.y, sy=plot.yErr, sx=plot.xErr)
@@ -57,13 +58,18 @@ def perform_arbitrary_regression(
         coList[pyFunc.letterToNumber[letter]] = coef
     output = next_val(coList, [], None)
 
-    f_x = pyFunc.function(output.beta, plot.x)
+    space = np.linspace(plot.x[0], plot.x[-1], 1000)
+    f_x = pyFunc.function(output.beta, space)
 
     coefficients = {}
     for letter, number in pyFunc.letterToNumber.items():
         coefficients[letter] = Value(output.beta[number], output.sd_beta[number])
 
-    return f_x, coefficients
+    return (
+        plots.Plottable(x=space, y=f_x),
+        coefficients,
+        pyFunc.function(output.beta, plot.x),
+    )
 
 
 def perform_regressions(
@@ -78,15 +84,17 @@ def perform_regressions(
     fits = []
     for index, plot in enumerate(plot_arr):
         if regressionType == "linear":
-            fit, params = perform_linear_regression(plot)
+            fit, params, plot_x_fit = perform_linear_regression(plot)
         else:
-            fit, params = perform_arbitrary_regression(plot, compiled_regression)
+            fit, params, plot_x_fit = perform_arbitrary_regression(
+                plot, compiled_regression
+            )
 
         print(f"Regression for {plot.label}, which is plot #{index+1}")
         print(f"\tCoefficients:")
         print("\t\t" + "\n\t\t".join(DictionaryFormatter(params).splitlines()))
-        print(f"\tRSquared: {rSquared(plot.y, fit)}")
-        fits.append(plots.Plottable(x=plot.x, y=fit))
+        print(f"\tRSquared: {rSquared(plot.y, plot_x_fit)}")
+        fits.append(fit)
 
     return fits
 

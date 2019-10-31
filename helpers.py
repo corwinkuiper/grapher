@@ -10,6 +10,8 @@ def npArrayOrNone(a):
 
 
 def rSquared(y, f) -> float:
+    y = np.array(y)
+    f = np.array(f)
     mean = y.mean()
     total = ((y - mean) ** 2).sum()
     residual = ((y - f) ** 2).sum()
