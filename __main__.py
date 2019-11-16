@@ -8,6 +8,7 @@ import matplot
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def make_graph_of_arguments():
     arguments = cli().args()
 
@@ -24,7 +25,7 @@ def make_graph_of_arguments():
     fourier_transforms = []
     if arguments.fourier:
         fourier_transforms = fourier.perform_transforms(plots)
-    
+
     derived_quantities = []
     derived_quantities.extend(regressions)
     derived_quantities.extend(fourier_transforms)
@@ -32,8 +33,12 @@ def make_graph_of_arguments():
     if arguments.saveDerived:
         n = 1
         for p in derived_quantities:
-            np.savetxt(f"{arguments.saveDerived}_derived_{n}.txt", np.transpose([p.x, p.y]), header=p.description)
-    
+            np.savetxt(
+                f"{arguments.saveDerived}_derived_{n}.txt",
+                np.transpose([p.x, p.y]),
+                header=p.description,
+            )
+
     if arguments.derivedOnly:
         plots = derived_quantities
     else:

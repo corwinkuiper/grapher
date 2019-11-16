@@ -93,9 +93,11 @@ def perform_regressions(
         description = f"Regression for {plot.label}, which is plot #{index+1}"
         description += f"\n\tFunction was: {regressionType}"
         description += f"\n\tCoefficients:"
-        description += "\n\t\t" + "\n\t\t".join(DictionaryFormatter(params).splitlines())
+        description += "\n\t\t" + "\n\t\t".join(
+            DictionaryFormatter(params).splitlines()
+        )
         description += f"\n\tRSquared: {rSquared(plot.y, plot_x_fit)}"
-        
+
         fit.derived = True
         fit.description = description
 

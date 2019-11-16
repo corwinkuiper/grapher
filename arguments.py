@@ -147,7 +147,12 @@ class cli:
             default=False,
         )
 
-        self.parser.add_argument("--saveDerived", default=None, type=str, help="Save the derived data, such as regressions and fourier transforms")
+        self.parser.add_argument(
+            "--saveDerived",
+            default=None,
+            type=str,
+            help="Save the derived data, such as regressions and fourier transforms",
+        )
 
         self.parser.add_argument(
             "--displayType",

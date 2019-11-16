@@ -26,7 +26,6 @@ class Plottable:
         self.description = description
 
 
-
 class Plotstyle:
 
     types = {"dashed": ["--", "-.", ":"], "marker": [".", "s", "v", "^", "<", ">"]}
