@@ -39,14 +39,16 @@ class Parser:
         for col in self.yErrors:
             yErrors.append([row[col] for row in data])
         if self.xError:
-            xError.append([row[self.xError] for row in data])
+            xError = [row[self.xError] for row in data]
         for i, y in enumerate(all_y):
             plots_from_file.append(
                 plots.Plottable(
                     x=np.array(x),
                     y=np.array(y),
                     label=file_name,
-                    yErr=helpers.npArrayOrNone(None if i >= len(yErrors) else yErrors[i]),
+                    yErr=helpers.npArrayOrNone(
+                        None if i >= len(yErrors) else yErrors[i]
+                    ),
                     xErr=helpers.npArrayOrNone(xError),
                     displayType=self.displayType,
                 )
