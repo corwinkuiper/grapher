@@ -30,26 +30,23 @@ class Parser:
 
         plots_from_file = []
         data = np.loadtxt(file_name)
-        x = []
-        all_y: List[List[float]] = [[] for i in range(0, len(self.columns))]
-        yErrors: List[List[float]] = [[] for i in range(0, len(self.columns))]
+        x = [row[0] for row in data]
+        all_y: List[List[float]] = []
+        yErrors: List[List[float]] = []
         xError: List[float] = []
-        for item in data:
-            x.append(item[0])
-            for i, v in enumerate(self.columns):
-                val = item[v]
-                all_y[i].append(val)
-            for i, v in enumerate(self.yErrors):
-                yErrors[i].append(item[v])
-            if self.xError:
-                xError.append(item[self.xError])
+        for col in self.columns:
+            all_y.append([row[col] for row in data])
+        for col in self.yErrors:
+            yErrors.append([row[col] for row in data])
+        if self.xError:
+            xError.append([row[self.xError] for row in data])
         for i, y in enumerate(all_y):
             plots_from_file.append(
                 plots.Plottable(
                     x=np.array(x),
                     y=np.array(y),
                     label=file_name,
-                    yErr=helpers.npArrayOrNone(yErrors[i]),
+                    yErr=helpers.npArrayOrNone(None if i >= len(yErrors) else yErrors[i]),
                     xErr=helpers.npArrayOrNone(xError),
                     displayType=self.displayType,
                 )
