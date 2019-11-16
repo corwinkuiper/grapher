@@ -5,15 +5,15 @@ from typing import List, Union, Tuple
 class arguments:
     def __init__(
         self,
-        files: List[str] = None,
-        labels: List[str] = None,
-        x: str = None,
-        y: str = None,
+        files: List[str] = [],
+        labels: Union[List[str], None] = None,
+        x: str = "",
+        y: str = "",
         hideLegend: bool = False,
         columns: List[int] = [1],
         yErrors: List[int] = [],
-        xError: int = None,
-        regression: str = None,
+        xError: Union[int, None] = None,
+        regression: Union[str, None] = None,
         displayType: str = "line",
         hideXTicks: bool = False,
         hideYTicks: bool = False,
@@ -22,16 +22,20 @@ class arguments:
         latex: bool = False,
         xMultiplier: float = 1.0,
         yMultiplier: float = 1.0,
+        saveDerived: Union[str, None] = None,
+        fourier: bool = False,
+        hide: bool = False,
+        derivedOnly: bool = False,
     ):
         self.files: List[str] = files
-        self.labels: List[str] = labels
+        self.labels: Union[List[str], None] = labels
         self.x: str = x
         self.y: str = y
         self.hideLegend: bool = hideLegend
         self.columns: List[int] = columns
         self.yErrors: List[int] = yErrors
-        self.xError: int = xError
-        self.regression: str = regression
+        self.xError: Union[int, None] = xError
+        self.regression: Union[str, None] = regression
         self.displayType: str = displayType
         self.hideXLabels: bool = hideXLabels
         self.hideYLabels: bool = hideYLabels
@@ -40,24 +44,10 @@ class arguments:
         self.latex: bool = latex
         self.xMultiplier: float = xMultiplier
         self.yMultiplier: float = yMultiplier
-
-    files: List[str]
-    labels: List[str]
-    x: str
-    y: str
-    hideLegend: bool
-    columns: List[int]
-    yErrors: List[int]
-    xError: int
-    regression: str
-    displayType: str
-    hideXLabels: bool
-    hideYLabels: bool
-    hideXTicks: bool
-    hideYTicks: bool
-    latex: bool
-    xMultiplier: float
-    yMultiplier: float
+        self.saveDerived: Union[str, None] = saveDerived
+        self.fourier: bool = fourier
+        self.hide: bool = hide
+        self.derivedOnly: bool = derivedOnly
 
     def validate(self) -> Tuple[bool, List]:
         error_list = []
@@ -84,8 +74,6 @@ class BadArguments(Exception):
 
 
 class cli:
-    parser = None
-
     def args(self) -> arguments:
         argument = arguments()
 
@@ -151,6 +139,15 @@ class cli:
             default=None,
             help="Specify the type of regression to perform",
         )
+        self.parser.add_argument(
+            "--fourier",
+            help="Perform a fourier transform on the input",
+            action="store_const",
+            const=True,
+            default=False,
+        )
+
+        self.parser.add_argument("--saveDerived", default=None, type=str, help="Save the derived data, such as regressions and fourier transforms")
 
         self.parser.add_argument(
             "--displayType",
@@ -191,6 +188,22 @@ class cli:
         self.parser.add_argument(
             "--latex",
             help="Use latex to render text",
+            action="store_const",
+            const=True,
+            default=False,
+        )
+
+        self.parser.add_argument(
+            "--hide",
+            help="Don't show the plot, only perform side effects",
+            action="store_const",
+            const=True,
+            default=False,
+        )
+
+        self.parser.add_argument(
+            "--derivedOnly",
+            help="Only display derived plots",
             action="store_const",
             const=True,
             default=False,

@@ -31,7 +31,7 @@ def plot(plots: List[plots.Plottable]):
 
 
 def set_style(args: arguments):
-    if not args.hideLegend:
+    if not args.hideLegend and not args.derivedOnly:
         plt.legend()
 
     # Start standard style, if you don't like how this is done you can change it

@@ -11,14 +11,20 @@ class Plottable:
         xErr: Union[int, None] = None,
         yErr: Union[List[int], None] = None,
         displayType: Union[str, None] = None,
+        derived: bool = False,
+        description: Union[str, None] = None,
     ):
-        self.x = np.array(x)
-        self.y = np.array(y)
+        self.x: np.ndarray = np.array(x)
+        self.y: np.ndarray = np.array(y)
 
         self.label = label
         self.xErr = xErr
         self.yErr = yErr
         self.displayType = displayType
+
+        self.derived = derived
+        self.description = description
+
 
 
 class Plotstyle:

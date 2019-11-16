@@ -90,10 +90,16 @@ def perform_regressions(
                 plot, compiled_regression
             )
 
-        print(f"Regression for {plot.label}, which is plot #{index+1}")
-        print(f"\tCoefficients:")
-        print("\t\t" + "\n\t\t".join(DictionaryFormatter(params).splitlines()))
-        print(f"\tRSquared: {rSquared(plot.y, plot_x_fit)}")
+        description = f"Regression for {plot.label}, which is plot #{index+1}"
+        description += f"\n\tFunction was: {regressionType}"
+        description += f"\n\tCoefficients:"
+        description += "\n\t\t" + "\n\t\t".join(DictionaryFormatter(params).splitlines())
+        description += f"\n\tRSquared: {rSquared(plot.y, plot_x_fit)}"
+        
+        fit.derived = True
+        fit.description = description
+
+        print(description)
         fits.append(fit)
 
     return fits
