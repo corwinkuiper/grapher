@@ -61,9 +61,10 @@ def perform_arbitrary_regression(
     space = np.linspace(plot.x[0], plot.x[-1], 1000)
     f_x = pyFunc.function(output.beta, space)
 
+    uncertainties = np.sqrt(np.diag(output.cov_beta))
     coefficients = {}
     for letter, number in pyFunc.letterToNumber.items():
-        coefficients[letter] = Value(output.beta[number], output.sd_beta[number])
+        coefficients[letter] = Value(output.beta[number], uncertainties[number])
 
     return (
         plots.Plottable(x=space, y=f_x),
@@ -125,6 +126,7 @@ class mathsFunction:
         "e": np.e,
         "exp": np.exp,
         "log": np.log,
+        "sqrt": np.sqrt,
         "__builtins__": None,
     }
 
