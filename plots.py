@@ -5,11 +5,11 @@ from typing import List, Union
 class Plottable:
     def __init__(
         self,
-        x=[],
-        y=[],
+        x: np.ndarray = [],
+        y: np.ndarray = [],
         label: Union[str, None] = None,
-        xErr: Union[int, None] = None,
-        yErr: Union[List[int], None] = None,
+        xErr: Union[np.ndarray, None] = None,
+        yErr: Union[np.ndarray, None] = None,
         displayType: Union[str, None] = None,
         derived: bool = False,
         description: Union[str, None] = None,
